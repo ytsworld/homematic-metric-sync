@@ -15,9 +15,15 @@ type HmIPCurrentStatus struct {
 }
 
 type HmIPGroup struct {
-	Id    string `json:"id"`
-	Label string `json:"label"`
-	Type  string `json:"type"`
+	Id       string        `json:"id"`
+	Label    string        `json:"label"`
+	Type     string        `json:"type"`
+	Channels []HmIPChannel `json:"channels"`
+}
+
+type HmIPChannel struct {
+	DeviceId     string `json:"deviceId"`
+	ChannelIndex int8   `json:"channelIndex"`
 }
 
 type HmIPDevice struct {
@@ -29,8 +35,11 @@ type HmIPDevice struct {
 }
 
 type HmIPFunctionalChannel struct {
-	FunctionalChannelType string  `json:"functionalChannelType"`
-	ActualTemperature     float32 `json:"actualTemperature"`
-	Humidity              int8    `json:"humidity"`
-	VaporAmount           float32 `json:"vaporAmount"`
+	FunctionalChannelType   string  `json:"functionalChannelType"`
+	ActualTemperature       float32 `json:"actualTemperature"`
+	Humidity                int8    `json:"humidity"`
+	VaporAmount             float32 `json:"vaporAmount"`
+	EnergyCounter           float32 `json:"energyCounter"`
+	CurrentPowerConsumption float32 `json:"currentPowerConsumption"`
+	EnergyMeterMode         string  `json:"energyMeterMode"`
 }
