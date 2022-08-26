@@ -1,4 +1,4 @@
-# homeatic-metric-sync
+# homematic-metric-sync
 
 ## Create or switch to virtual envrionment
 
