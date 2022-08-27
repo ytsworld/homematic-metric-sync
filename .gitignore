@@ -2,3 +2,5 @@
 local/
 config.ini
 data/
+
+hmip_sync.yaml

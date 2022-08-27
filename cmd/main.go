@@ -1,79 +1,69 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"log"
+	"os"
+	"time"
 
 	"github.com/ytsworld/homematic-metric-sync/pkg/hmip"
+	"github.com/ytsworld/homematic-metric-sync/pkg/sync"
 )
 
 func init() {
 
 }
 
-var (
-	deviceTypesForHistorization []string = []string{"WALL_MOUNTED_THERMOSTAT_PRO", "PLUGABLE_SWITCH_MEASURING", "TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR"}
-)
-
 func main() {
 
-	fmt.Printf("Hello.\n")
-
-	c, err := hmip.CreateClient()
-	if err != nil {
-		panic(err)
+	configFile := os.Getenv("CONFIG_FILE")
+	if configFile == "" {
+		configFile = "./hmip_sync.yaml"
 	}
 
-	err = c.FetchCurrentState()
+	config, err := ReadConfig(configFile)
 	if err != nil {
-		panic(err)
+		log.Fatalf("Error reading config file: %s", err)
 	}
 
-	state := c.GetLastFetchedState()
+	c, err := hmip.CreateClient(config.HmIP.AuthToken, config.HmIP.AccessPoint, config.HmIP.UserAgent)
+	if err != nil {
+		log.Fatalf("Error connecting to HmIP: %s", err)
+	}
 
-	for k, device := range state.Devices {
+	influxClient := sync.CreateClient(config.Influx.Url, config.Influx.Token, config.Influx.Organization, config.Influx.Bucket)
 
-		if contains(deviceTypesForHistorization, device.Type) {
-			room := c.SearchRoomForDevice(k)
-			fmt.Printf("Device ID: %s, type: %s, label: %s, room: %s\n", k, device.Type, device.Label, room)
-			if device.Type == "WALL_MOUNTED_THERMOSTAT_PRO" {
-				for _, fc := range device.FunctionalChannels {
-					if fc.FunctionalChannelType == "WALL_MOUNTED_THERMOSTAT_PRO_CHANNEL" {
-						fmt.Printf(" - temp: %f, humidty: %d\n", fc.ActualTemperature, fc.Humidity)
-					}
-				}
-			}
-			if device.Type == "PLUGABLE_SWITCH_MEASURING" {
-				for _, fc := range device.FunctionalChannels {
-					if fc.FunctionalChannelType == "SWITCH_MEASURING_CHANNEL" {
-						fmt.Printf(" - counter: %f, consumption: %f, mode: %s\n", fc.EnergyCounter, fc.CurrentPowerConsumption, fc.EnergyMeterMode)
-					}
-				}
-			}
-			if device.Type == "TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR" {
-				for _, fc := range device.FunctionalChannels {
-					if fc.FunctionalChannelType == "CLIMATE_SENSOR_CHANNEL" {
-						fmt.Printf(" - temp: %f, humidty: %d\n", fc.ActualTemperature, fc.Humidity)
-					}
-				}
-			}
+	for {
+		currentDate := time.Now().Format("2006-01-02")
+
+		err = c.FetchCurrentState()
+		if err != nil {
+			panic(err)
 		}
 
-	}
+		metrics := sync.ConvertHmIPStateToMetrics(c)
 
-	/* 	str, err := json.Marshal(currentState)
-	   	if err != nil {
-	   		panic(err)
-	   	}
-
-	   	fmt.Println("output: ", string(str)) */
-
-}
-
-func contains(s []string, e string) bool {
-	for _, a := range s {
-		if a == e {
-			return true
+		metricsJson, err := json.Marshal(metrics)
+		if err != nil {
+			panic(err)
 		}
+
+		f, err := os.OpenFile(fmt.Sprintf("./data/%s-metrics.log", currentDate),
+			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+		if err != nil {
+			log.Println(err)
+		}
+		defer f.Close()
+
+		if _, err := f.WriteString(fmt.Sprintf("%s\n", metricsJson)); err != nil {
+			log.Println(err)
+		}
+
+		influxClient.WriteMetricsToInflux(metrics)
+
+		log.Printf("Persisted data from %d devices", len(metrics.Metrics))
+		time.Sleep(60 * time.Second)
 	}
-	return false
+
 }

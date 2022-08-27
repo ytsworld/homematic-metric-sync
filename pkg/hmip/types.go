@@ -3,10 +3,21 @@ package hmip
 import "github.com/augurysys/timestamp"
 
 type HmIPClient struct {
-	AuthToken    string
-	AccessPoint  string
-	UserAgent    string
-	CurrentState *HmIPCurrentStatus
+	AuthToken       string
+	AccessPoint     string
+	UserAgent       string
+	RESTEndpoint    string
+	ClientAuthToken string
+	CurrentState    *HmIPCurrentStatus
+	LastRequestTime timestamp.Timestamp
+}
+
+type HmIPLookupResponse struct {
+	ApiVersion              string `json:"apiVersion"`
+	PrimaryAccessPointId    string `json:"primaryAccessPointId"`
+	RequestingAccessPointId string `json:"requestingAccessPointId"`
+	UrlREST                 string `json:"urlREST"`
+	UrlWebSocket            string `json:"urlWebSocket"`
 }
 
 type HmIPCurrentStatus struct {
