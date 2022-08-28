@@ -1,11 +1,16 @@
-FROM python:3-alpine
+FROM golang:1.18-alpine AS builder
+WORKDIR /data
+COPY go.mod go.sum ./
+COPY cmd ./cmd
+COPY pkg ./pkg
+RUN go mod download
+RUN ls -l ./
+RUN go build -o hmip_sync ./cmd/*
 
-RUN adduser -D -s /bin/ash -u 1000 -g 1000 py
-USER py
-
-COPY get_data.py /get_data.py
-COPY requirements.txt /requirements.txt
-RUN pip install -r requirements.txt
-
-
-CMD ["python", "/get_data.py"]
+FROM alpine:3  
+RUN apk --no-cache add ca-certificates
+RUN addgroup -g 1000 hmip_sync && adduser -DH -h / -u 1000 -G hmip_sync hmip_sync
+COPY --from=builder /data/hmip_sync /
+RUN chown hmip_sync:hmip_sync /hmip_sync
+USER hmip_sync
+CMD ["/hmip_sync"]  
