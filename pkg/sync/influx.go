@@ -26,19 +26,23 @@ func CreateClient(url string, token string, organization string, bucket string) 
 	}
 }
 
-func (c *InfluxClient) WriteMetricsToInflux(metrics *Metrics) {
+func (c *InfluxClient) WriteMetricsToInflux(metrics *Metrics) error {
 	client := influxdb2.NewClient(c.Url, c.Token)
 	defer client.Close()
 
 	writeAPI := client.WriteAPIBlocking(c.Organization, c.Bucket)
 
 	for _, m := range metrics.Metrics {
-		writeMetric(writeAPI, m)
+		err := writeMetric(writeAPI, m)
+		if err != nil {
+			return err
+		}
 	}
 
+	return nil
 }
 
-func writeMetric(writeAPI api.WriteAPIBlocking, metric *Metric) {
+func writeMetric(writeAPI api.WriteAPIBlocking, metric *Metric) error {
 	measurement := fmt.Sprintf("%s: %s", metric.Location, metric.DeviceLabel)
 
 	tags := map[string]string{
@@ -64,5 +68,5 @@ func writeMetric(writeAPI api.WriteAPIBlocking, metric *Metric) {
 		fields,
 		time.Now()) //TODO use lastStatusUpdate of metric!
 
-	writeAPI.WritePoint(context.Background(), p)
+	return writeAPI.WritePoint(context.Background(), p)
 }

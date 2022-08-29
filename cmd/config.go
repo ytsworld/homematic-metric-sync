@@ -19,9 +19,10 @@ type Influx struct {
 }
 
 type HmIP struct {
-	AuthToken   string `yaml:"authToken"`
-	AccessPoint string `yaml:"accessPoint"`
-	UserAgent   string `yaml:"userAgent"`
+	AuthToken    string `yaml:"authToken"`
+	AccessPoint  string `yaml:"accessPoint"`
+	UserAgent    string `yaml:"userAgent"`
+	PollInterval int16  `yaml:"pollInterval"`
 }
 
 func ReadConfig(file string) (*Config, error) {

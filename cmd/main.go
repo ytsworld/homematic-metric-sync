@@ -39,31 +39,44 @@ func main() {
 
 		err = c.FetchCurrentState()
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			time.Sleep(time.Duration(config.HmIP.PollInterval) * time.Second)
+			continue
 		}
 
 		metrics := sync.ConvertHmIPStateToMetrics(c)
 
 		metricsJson, err := json.Marshal(metrics)
 		if err != nil {
-			panic(err)
+			log.Println(err)
+			time.Sleep(time.Duration(config.HmIP.PollInterval) * time.Second)
+			continue
 		}
 
 		f, err := os.OpenFile(fmt.Sprintf("./data/%s-metrics.log", currentDate),
 			os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
 		if err != nil {
 			log.Println(err)
+			time.Sleep(time.Duration(config.HmIP.PollInterval) * time.Second)
+			continue
 		}
 		defer f.Close()
 
 		if _, err := f.WriteString(fmt.Sprintf("%s\n", metricsJson)); err != nil {
 			log.Println(err)
+			time.Sleep(time.Duration(config.HmIP.PollInterval) * time.Second)
+			continue
 		}
 
-		influxClient.WriteMetricsToInflux(metrics)
+		err = influxClient.WriteMetricsToInflux(metrics)
+		if err != nil {
+			log.Println(fmt.Sprintf("Error writing metrics to influx: %s.", err))
+			time.Sleep(time.Duration(config.HmIP.PollInterval) * time.Second)
+			continue
+		}
 
 		log.Printf("Persisted data from %d devices", len(metrics.Metrics))
-		time.Sleep(60 * time.Second)
+		time.Sleep(time.Duration(config.HmIP.PollInterval) * time.Second)
 	}
 
 }

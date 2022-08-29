@@ -3,6 +3,7 @@ package hmip
 import (
 	"bytes"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -27,6 +28,10 @@ func (c *HmIPClient) FetchCurrentState() error {
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return errors.New(fmt.Sprintf("Error requesting data from HmIP; response code: %d, status: %s", resp.StatusCode, resp.Status))
 	}
 
 	var currentState HmIPCurrentStatus
