@@ -5,18 +5,20 @@ import (
 	"crypto/sha512"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
 	"strings"
 )
 
-func CreateClient(authToken string, accessPoint string, userAgent string) (*HmIPClient, error) {
+func CreateClient(authToken, accessPoint, userAgent, clientTokenSalt string) (*HmIPClient, error) {
 
 	c := HmIPClient{
-		AuthToken:   authToken,
-		AccessPoint: accessPoint,
-		UserAgent:   userAgent,
+		AuthToken:       authToken,
+		AccessPoint:     accessPoint,
+		UserAgent:       userAgent,
+		ClientTokenSalt: clientTokenSalt,
 	}
 
 	err := c.lookupHmIPHost()
@@ -49,10 +51,8 @@ func (c *HmIPClient) getClientCharacteristics() string {
 	return fmt.Sprintf(requestTemplate, c.AccessPoint)
 }
 
-const clientTokenSalt string = "jiLpVitHvWnIGD1yo7MA"
-
 func (c *HmIPClient) generateAuthClientToken() string {
-	sha := sha512.Sum512([]byte(fmt.Sprintf("%s%s", c.AccessPoint, clientTokenSalt)))
+	sha := sha512.Sum512([]byte(fmt.Sprintf("%s%s", c.AccessPoint, c.ClientTokenSalt)))
 	hexValue := hex.EncodeToString(sha[:])
 	return strings.ToUpper(hexValue)
 }
@@ -70,6 +70,10 @@ func (c *HmIPClient) lookupHmIPHost() error {
 	resp, err := client.Do(req)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode != 200 {
+		return errors.New(fmt.Sprintf("Error doing lookup for homematic REST API. Code: %d Status: %s", resp.StatusCode, resp.Status))
 	}
 
 	var res HmIPLookupResponse

@@ -8,6 +8,7 @@ type HmIPClient struct {
 	UserAgent       string
 	RESTEndpoint    string
 	ClientAuthToken string
+	ClientTokenSalt string
 	CurrentState    *HmIPCurrentStatus
 	LastRequestTime timestamp.Timestamp
 }

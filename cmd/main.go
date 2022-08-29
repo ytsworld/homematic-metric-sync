@@ -27,7 +27,7 @@ func main() {
 		log.Fatalf("Error reading config file: %s", err)
 	}
 
-	c, err := hmip.CreateClient(config.HmIP.AuthToken, config.HmIP.AccessPoint, config.HmIP.UserAgent)
+	c, err := hmip.CreateClient(config.HmIP.AuthToken, config.HmIP.AccessPoint, config.HmIP.UserAgent, config.HmIP.ClientTokenSalt)
 	if err != nil {
 		log.Fatalf("Error connecting to HmIP: %s", err)
 	}
