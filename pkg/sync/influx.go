@@ -66,7 +66,7 @@ func writeMetric(writeAPI api.WriteAPIBlocking, metric *Metric) error {
 	p := influxdb2.NewPoint(measurement,
 		tags,
 		fields,
-		time.Now()) //TODO use lastStatusUpdate of metric!
+		time.Now())
 
 	return writeAPI.WritePoint(context.Background(), p)
 }
