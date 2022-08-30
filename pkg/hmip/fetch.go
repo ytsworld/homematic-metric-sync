@@ -40,16 +40,6 @@ func (c *HmIPClient) FetchCurrentState() error {
 		return err
 	}
 
-	/* 	dat, err := os.ReadFile("./local/getCurrentState.json")
-	   	if err != nil {
-	   		return err
-	   	} */
-
-	/* 	err = json.Unmarshal([]byte(dat), &currentState)
-	   	if err != nil {
-	   		return err
-	   	} */
-
 	c.CurrentState = &currentState
 	c.LastRequestTime = *timestamp.Now()
 

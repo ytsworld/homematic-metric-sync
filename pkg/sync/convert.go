@@ -26,7 +26,6 @@ func ConvertHmIPStateToMetrics(client *hmip.HmIPClient) *Metrics {
 			metric.Location = room
 			metric.LastStatusUpdate = device.LastStatusUpdate
 
-			//fmt.Printf("Device ID: %s, type: %s, label: %s, room: %s\n", id, device.Type, device.Label, room)
 			if device.Type == "WALL_MOUNTED_THERMOSTAT_PRO" || device.Type == "TEMPERATURE_HUMIDITY_SENSOR_OUTDOOR" {
 				metric.MetricType = "Climate"
 				climate := ClimateMetric{}
@@ -34,7 +33,6 @@ func ConvertHmIPStateToMetrics(client *hmip.HmIPClient) *Metrics {
 					if fc.FunctionalChannelType == "WALL_MOUNTED_THERMOSTAT_PRO_CHANNEL" || fc.FunctionalChannelType == "CLIMATE_SENSOR_CHANNEL" {
 						climate.Humidity = fc.Humidity
 						climate.Temperature = fc.ActualTemperature
-						//fmt.Printf(" - temp: %f, humidty: %d\n", fc.ActualTemperature, fc.Humidity)
 					}
 				}
 				metric.Climate = &climate
