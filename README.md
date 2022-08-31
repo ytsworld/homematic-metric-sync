@@ -27,7 +27,7 @@ hmip:
   authToken: "" # An auth token to access Homematic Cloud. <https://github.com/hahn-th/homematicip-rest-api/blob/master/hmip_generate_auth_token.py>
   accessPoint: "<unique-access-point-id>" # The id of your Homematic IP access point
   userAgent: "golang 1.18" # Configurable user Agent used for User-Agent request header on http requests
-  pollInterval: 300 # It is recommended not to poll data to frequently, otherwise request rate limit will hit you
+  pollInterval: 900 # It is recommended not to poll data to frequently, otherwise request rate limit will hit you
   clientTokenSalt: "<client token>" # A static string used to create a hash. You can get it from: https://github.com/hahn-th/homematicip-rest-api/blob/master/homematicip/base/base_connection.py#L86
 ```
 
