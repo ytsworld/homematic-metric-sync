@@ -68,6 +68,13 @@ func main() {
 			continue
 		}
 
+		ok := sync.SanityCheck(metrics)
+		if !ok {
+			log.Println("Error doing sanity check. To many zero values!")
+			time.Sleep(time.Duration(config.HmIP.PollInterval) * time.Second)
+			continue
+		}
+
 		err = influxClient.WriteMetricsToInflux(metrics)
 		if err != nil {
 			log.Println(fmt.Sprintf("Error writing metrics to influx: %s.", err))
