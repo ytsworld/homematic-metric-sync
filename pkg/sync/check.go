@@ -1,5 +1,7 @@
 package sync
 
+import "log"
+
 const SanityCheckPercentage = 20
 
 /**
@@ -23,5 +25,7 @@ func SanityCheck(metrics *Metrics) bool {
 		}
 	}
 
-	return zeroValues > total/100*SanityCheckPercentage
+	log.Printf("%d out of %d metrics have zero values", zeroValues, total)
+
+	return zeroValues <= total/100*SanityCheckPercentage
 }
