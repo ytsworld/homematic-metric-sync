@@ -7,8 +7,9 @@ import (
 )
 
 type Config struct {
-	Influx Influx `yaml:"influx"`
-	HmIP   HmIP   `yaml:"hmip"`
+	Influx                Influx `yaml:"influx"`
+	HmIP                  HmIP   `yaml:"hmip"`
+	SanityCheckPercentage int16  `yaml:"sanityCheckPercentage"`
 }
 
 type Influx struct {

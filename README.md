@@ -17,6 +17,8 @@ The attached `Dockerfile` builds the app and bakes it into an image.
 A configuration file is required for the app to get its endpoints:
 
 ```yaml
+sanityCheckPercentage: 20 # Ensure not to persist records if more than 20 percent of the deviced return 0 data
+
 influx:
   url:          "http://<your-influx-instance>:8086"
   token:        "<app-token->" # APP token with write access to the target bucket

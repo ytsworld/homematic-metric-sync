@@ -68,7 +68,7 @@ func main() {
 			continue
 		}
 
-		ok := sync.SanityCheck(metrics)
+		ok := sync.SanityCheck(metrics, config.SanityCheckPercentage)
 		if !ok {
 			log.Println("Error doing sanity check. To many zero values!")
 			time.Sleep(time.Duration(config.HmIP.PollInterval) * time.Second)
